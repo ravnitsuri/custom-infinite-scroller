@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "b16c5e70e7bc5169ff96da963a53b513",
+    "revision": "b40438f4160e60f76c9a7e315c9daba1",
     "url": "/custom-infinite-scroller/index.html"
   },
   {
-    "revision": "5e65e7f449550c667cc0",
+    "revision": "6f71f65f9029f6b11bfb",
     "url": "/custom-infinite-scroller/static/css/main.728328fd.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/custom-infinite-scroller/static/js/2.e76c351c.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "5e65e7f449550c667cc0",
-    "url": "/custom-infinite-scroller/static/js/main.88a45850.chunk.js"
+    "revision": "6f71f65f9029f6b11bfb",
+    "url": "/custom-infinite-scroller/static/js/main.e5f21e69.chunk.js"
   },
   {
     "revision": "056ac7ca9e8ab28eba57",
