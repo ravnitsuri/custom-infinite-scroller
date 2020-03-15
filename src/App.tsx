@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import DataTable from "./DataTable";
+import DataTable from "./components/DataTable";
+import { AppContainer, ContentBox } from "./components/presentational";
 
 export interface APIPhoto {
   albumId: number;
@@ -10,30 +10,29 @@ export interface APIPhoto {
   thumbnailUrl: string;
 }
 
-const AppContainer = styled.div`
-  display: flex;
-  height: 100vh;
-  background: #ccc;
-`;
-
-const ContentBox = styled.div`
-  width: 100%;
-  margin: 20px 40px;
-`;
-
 function App() {
   const columns = React.useMemo(
     () => [
       {
-        Header: "Thumbnail Url",
+        Header: "Thumbnail",
         accessor: "thumbnailUrl",
-        Cell: ({ row }: any) => <img alt={row.values.title} src={row.values.thumbnailUrl} height="60px"/>,
-        width: 70
+        Cell: ({ row }: any) => (
+          <img
+            alt={row.values.title}
+            src={row.values.thumbnailUrl}
+            height="60px"
+          />
+        ),
+        width: 50
       },
       {
         Header: "Title",
         accessor: "title",
         Cell: ({ row }: any) => <a href={row.values.url}>{row.values.title}</a>
+      },
+      {
+        Header: "Url",
+        accessor: "url"
       },
       {
         Header: "Album ID",
@@ -43,11 +42,7 @@ function App() {
       {
         Header: "ID",
         accessor: "id",
-        numeric: false
-      },
-      {
-        Header: "Url",
-        accessor: "url"
+        numeric: true
       }
     ],
     []
@@ -61,32 +56,37 @@ function App() {
     console.log({ selection });
   };
 
-  const [pagStart, setPagStart] = useState(0);
+  // ==============================
+  // Paginated data fetching
+  // ==============================
+
+  const [page, setPage] = useState(0);
   const pagLimit = 30;
 
   const [rows, setRows] = useState<APIPhoto[]>([]);
 
   useEffect(() => {
     fetch(
-      `https://jsonplaceholder.typicode.com/photos?_start=${pagStart}&_limit=${pagLimit}`
+      `https://jsonplaceholder.typicode.com/photos?_start=${page *
+        pagLimit}&_limit=${pagLimit}`
     )
       .then(response => response.json())
       .then((json: APIPhoto[]) => {
         console.log(json);
-        setRows([...rows, ...json]);
+        setRows(rows => [...rows, ...json]);
       });
-  }, [pagStart]);
+  }, [page]);
 
   return (
     <AppContainer>
       <ContentBox>
-        <h1>DataTable Component will be rendered below: </h1>
+        <h1>DataTable Component: </h1>
         <DataTable
           columns={columns}
           rows={rows}
           onRowClick={onRowClick}
           onSelectionChange={onSelectionChange}
-          paginator={{pagStart, setPagStart}}
+          paginator={{ page, setPage }}
         />
       </ContentBox>
     </AppContainer>

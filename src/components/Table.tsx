@@ -1,78 +1,22 @@
-import React, { useEffect, forwardRef } from "react";
-import styled from "styled-components";
+import React, { useEffect, useState } from "react";
 import {
-  useTable,
-  useResizeColumns,
   useFlexLayout,
-  useRowSelect
+  useResizeColumns,
+  useRowSelect,
+  useTable
 } from "react-table";
-
-import { FixedSizeList } from "react-window";
-
-import InfiniteLoader from "react-window-infinite-loader";
 import { Waypoint } from "react-waypoint";
+import { IndeterminateCheckbox } from "./checkbox";
+import { PaddingBox } from './presentational';
 
-const Styles = styled.div`
-  padding: 1rem;
-  display: block;
-  overflow: auto;
+// ===================================
+// Setup for "numeric" data alignment
+// ===================================
 
-  .table {
-    border-spacing: 0;
-    border: 1px solid black;
-
-    .thead {
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    .tbody {
-      overflow-y: scroll;
-      overflow-x: hidden;
-      height: 500px;
-    }
-
-    .tr {
-      :last-child {
-        .td {
-          border-bottom: 0;
-        }
-      }
-      border-bottom: 1px solid black;
-    }
-
-    .th,
-    .td {
-      margin: 0;
-      padding: 0.5rem;
-      border-right: 1px solid black;
-
-      position: relative;
-
-      :last-child {
-        border-right: 0;
-      }
-
-      .resizer {
-        right: 0;
-        background: blue;
-        width: 10px;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        z-index: 1;
-        touch-action: none;
-
-        &.isResizing {
-          background: red;
-        }
-      }
-    }
-  }
-`;
+// setting it up so only values change direction, not headings
 
 const headerProps = (props: any, { column }: any) =>
-  getStyles(props, column.numeric);
+  getStyles(props, null);
 
 const cellProps = (props: any, { cell }: any) =>
   getStyles(props, cell.column.numeric);
@@ -88,47 +32,31 @@ const getStyles = (props: any, align: any = false) => [
   }
 ];
 
-const IndeterminateCheckbox = React.forwardRef(
-  ({ indeterminate, ...rest }: any, ref) => {
-    const defaultRef = React.useRef();
-    const resolvedRef: any = ref || defaultRef;
-
-    React.useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate;
-    }, [resolvedRef, indeterminate]);
-
-    return (
-      <>
-        <input type="checkbox" ref={resolvedRef} {...rest} />
-      </>
-    );
-  }
-);
-
-function Table({
+export function Table({
   columns,
   data,
   onRowClick,
   onSelectionChange,
   paginator
 }: any) {
+  // ===================================
+  // Setup for column sizing defaults
+  // ===================================
+
   const defaultColumn = React.useMemo(
     () => ({
-      minWidth: 30,
+      minWidth: 50,
       width: 150,
-      maxWidth: 200
+      maxWidth: 300
     }),
     []
   );
 
   const {
     getTableProps,
-    getTableBodyProps,
-    // totalColumnsWidth,
     headerGroups,
     rows,
     prepareRow,
-    selectedFlatRows,
     state: { selectedRowIds }
   }: any = useTable(
     {
@@ -144,9 +72,9 @@ function Table({
         {
           id: "selection",
           disableResizing: true,
-          minWidth: 35,
-          width: 35,
-          maxWidth: 35,
+          minWidth: 50,
+          width: 50,
+          maxWidth: 50,
           Header: ({ getToggleAllRowsSelectedProps }: any) => (
             <div onClick={e => e.stopPropagation()}>
               <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
@@ -167,47 +95,47 @@ function Table({
     }
   ) as any;
 
-  useEffect(() => {
-    onSelectionChange(selectedRowIds);
-  }, [selectedRowIds]);
+  // ===================================
+  // Setup for checkbox handler
+  // ===================================
 
-  const RenderRow = React.useCallback(
-    ({ index, style }) => {
-      const row = rows[index];
-      prepareRow(row);
-      return (
-        <div
-          {...row.getRowProps({
-            style
-          })}
-          onClick={(e: React.MouseEvent) =>
-            onRowClick({ rowData: row.values, rowIndex: row.index })
-          }
-          className="tr"
-        >
-          {row.cells.map((cell: any) => {
-            return (
-              <div {...cell.getCellProps()} className="td">
-                {cell.render("Cell")}
-              </div>
-            );
-          })}
-        </div>
-      );
-    },
-    [prepareRow, rows]
-  );
+  useEffect(() => {
+    onSelectionChange(Object.keys(selectedRowIds));
+  }, [selectedRowIds, onSelectionChange]);
+
+  // ===================================
+  // Setup for infinite scroll
+  // ===================================
+
+  const [initialLoad, setInitialLoad] = useState(true);
 
   const InfiniteScrollLoadDataFunction = () => {
     console.log(`calling InfiniteScrollLoadDataFunction`, paginator);
 
-    const { pagStart, setPagStart } = paginator;
+    // stop run on initial render
+    if (initialLoad) {
+      setInitialLoad(false);
+      return;
+    }
 
-    setPagStart(pagStart + 1);
+    const { page, setPage } = paginator;
+
+    setPage(page + 1);
   };
   const InfiniteScrollLoadDataEnd = () => {
+    // note: could show/hide the loading indicator with this but it'll be buried in items anyway
+    // note: could setup custom loader using this
     console.log(`calling InfiniteScrollLoadDataEnd`);
   };
+
+  // ===================================
+  // Resetting scroll position on reload
+  // ===================================
+
+  useEffect(() => {
+    let el = document.querySelector(".tbody");
+    el && el.scrollTo(0, 0);
+  }, []);
 
   return (
     <>
@@ -236,7 +164,14 @@ function Table({
           {rows.map((row: any) => {
             prepareRow(row);
             return (
-              <div {...row.getRowProps()} className="tr">
+              <div
+                {...row.getRowProps()}
+                className="tr"
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault();
+                  onRowClick({ rowData: row.values, rowIndex: row.index });
+                }}
+              >
                 {row.cells.map((cell: any) => {
                   return (
                     <div {...cell.getCellProps(cellProps)} className="td">
@@ -252,32 +187,10 @@ function Table({
             onLeave={InfiniteScrollLoadDataEnd}
             bottomOffset="-50px"
           >
-            <div>Loading</div>
+            <PaddingBox>Loading...</PaddingBox>
           </Waypoint>
         </div>
       </div>
     </>
   );
 }
-
-function DataTable({
-  rows,
-  columns,
-  onRowClick,
-  onSelectionChange,
-  paginator
-}: any) {
-  return (
-    <Styles>
-      <Table
-        columns={columns}
-        data={rows}
-        onRowClick={onRowClick}
-        onSelectionChange={onSelectionChange}
-        paginator={paginator}
-      />
-    </Styles>
-  );
-}
-
-export default DataTable;
