@@ -36,7 +36,7 @@ export function Table({
   data,
   onRowClick,
   onSelectionChange,
-  paginator
+  onLoadMore
 }: any) {
   // ===================================
   // Setup for column sizing defaults
@@ -109,17 +109,13 @@ export function Table({
   const [initialLoad, setInitialLoad] = useState(true);
 
   const InfiniteScrollLoadDataFunction = () => {
-    console.log(`calling InfiniteScrollLoadDataFunction`, paginator);
-
     // stop run on initial render
     if (initialLoad) {
       setInitialLoad(false);
       return;
     }
 
-    const { page, setPage } = paginator;
-
-    setPage(page + 1);
+    onLoadMore()
   };
   const InfiniteScrollLoadDataEnd = () => {
     // note: could show/hide the loading indicator with this but it'll be buried in items anyway

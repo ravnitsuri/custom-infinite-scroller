@@ -8,7 +8,7 @@ function DataTable({
   columns,
   onRowClick,
   onSelectionChange,
-  paginator
+  onLoadMore
 }: any) {
   return (
     <Styles>
@@ -17,7 +17,7 @@ function DataTable({
         data={rows}
         onRowClick={onRowClick}
         onSelectionChange={onSelectionChange}
-        paginator={paginator}
+        onLoadMore={onLoadMore}
       />
     </Styles>
   );

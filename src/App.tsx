@@ -65,6 +65,10 @@ function App() {
 
   const [rows, setRows] = useState<APIPhoto[]>([]);
 
+  const onLoadMore = () => {
+    setPage(page => page+1)
+  }
+
   useEffect(() => {
     fetch(
       `https://jsonplaceholder.typicode.com/photos?_start=${page *
@@ -86,7 +90,7 @@ function App() {
           rows={rows}
           onRowClick={onRowClick}
           onSelectionChange={onSelectionChange}
-          paginator={{ page, setPage }}
+          onLoadMore={onLoadMore}
         />
       </ContentBox>
     </AppContainer>
