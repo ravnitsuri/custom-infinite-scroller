@@ -184,7 +184,6 @@ export function Table({
             onLeave={InfiniteScrollLoadDataEnd}
             bottomOffset="-50px"
           >
-            <PaddingBox>Loading...</PaddingBox>
           </Waypoint>
         </div>
       </div>

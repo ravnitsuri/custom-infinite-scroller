@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import DataTable from "./components/DataTable";
-import { AppContainer, ContentBox } from "./components/presentational";
+import {
+  AppContainer,
+  ContentBox,
+  FilterContainer
+} from "./components/presentational";
 
 export interface APIPhoto {
   albumId: number;
@@ -66,25 +70,59 @@ function App() {
   const [rows, setRows] = useState<APIPhoto[]>([]);
 
   const onLoadMore = () => {
-    setPage(page => page+1)
-  }
+    if (!searchVal) setPage(page => page + 1);
+  };
+
+  const [searchVal, setSearchVal] = useState("");
 
   useEffect(() => {
-    fetch(
-      `https://jsonplaceholder.typicode.com/photos?_start=${page *
-        pagLimit}&_limit=${pagLimit}`
-    )
+    let url = new URL("https://jsonplaceholder.typicode.com/photos") as any;
+    let params = {
+      _start: page * pagLimit,
+      _limit: pagLimit
+    } as any;
+
+    if (searchVal) {
+      params["title"] = searchVal;
+    }
+
+    var esc = encodeURIComponent;
+    var query = Object.keys(params)
+      .map(k => esc(k) + "=" + esc(params[k]))
+      .join("&");
+
+    console.log(url, query);
+
+    fetch(url.href + "?" + query)
       .then(response => response.json())
       .then((json: APIPhoto[]) => {
         console.log(json);
-        setRows(rows => [...rows, ...json]);
+        if (searchVal || page === 0) {
+          setRows(rows => [...json]);
+        } else {
+          setRows(rows => [...rows, ...json]);
+        }
       });
-  }, [page]);
+  }, [page, searchVal]);
 
   return (
     <AppContainer>
       <ContentBox>
         <h1>DataTable Component: </h1>
+        <FilterContainer>
+          <label htmlFor="Filter">Filter</label>
+          <input
+            type="text"
+            className="form-control"
+            aria-label="Filter"
+            placeholder="Enter search text..."
+            value={searchVal}
+            onChange={e => {
+              e.preventDefault();
+              setSearchVal(e.target.value);
+            }}
+          />
+        </FilterContainer>
         <DataTable
           columns={columns}
           rows={rows}

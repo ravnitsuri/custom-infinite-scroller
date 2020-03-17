@@ -13,7 +13,7 @@ export const ContentBox = styled.div`
 
 export const PaddingBox = styled.div`
   padding: 40px;
-`
+`;
 
 export const Styles = styled.div`
   padding: 1rem;
@@ -73,5 +73,22 @@ export const Styles = styled.div`
         }
       }
     }
+  }
+`;
+
+export const FilterContainer = styled.div`
+  padding: 18px;
+  margin: 20px 10px;
+  border-spacing: 0;
+  background: white;
+  border: 1px solid #f2f2f2;
+  box-shadow: 0 10px 20px rgba(133, 143, 175, 0.1);
+  border-radius: 4px;
+
+  input {
+    margin: 0 30px;
+    border:  1px solid #f2f2f2;
+    height: 30px;
+
   }
 `;
